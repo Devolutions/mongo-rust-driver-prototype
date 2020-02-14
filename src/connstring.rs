@@ -24,7 +24,7 @@ impl DNS {
 
     pub fn discover_hosts(&mut self) -> Result<()> {
         let host = format!("_mongodb._tcp.{}", self.name);
-        let srv_lookup = Resolver::default()?.lookup_srv(&host)?;
+        let srv_lookup = Resolver::from_system_conf()?.lookup_srv(&host)?;
         for srv in srv_lookup {
             self.discovered_hosts.push(Host::new(srv.target().to_utf8(), srv.port()));
         }
