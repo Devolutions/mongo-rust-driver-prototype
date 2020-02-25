@@ -1,3 +1,4 @@
+use common::{ReadPreference, ReadMode};
 use crate::{
     connstring::ConnectionString, db::ThreadedDatabase, Client, ClientOptions, ThreadedClient,
 };
@@ -33,6 +34,10 @@ impl r2d2::ManageConnection for MongoConnectionManager {
 
     fn connect(&self) -> Result<Self::Connection, Self::Error> {
         let client = Client::with_config(self.conn_str.clone(), self.client_options.clone(), None)?;
+
+        // Try to acquire a stream to establish a connection. If we can't, the connection can't be used.
+        client.acquire_stream(client.read_preference.clone())?;
+
         Ok(client.db(&self.db_name))
     }
 
