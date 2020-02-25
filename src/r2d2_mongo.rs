@@ -1,4 +1,3 @@
-use common::{ReadPreference, ReadMode};
 use crate::{
     connstring::ConnectionString, db::ThreadedDatabase, Client, ClientOptions, ThreadedClient,
 };
