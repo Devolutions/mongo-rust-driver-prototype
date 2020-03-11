@@ -84,7 +84,7 @@ impl From<AggregateOptions> for bson::Document {
         let cursor = if let Some(false) = options.use_cursor {
            doc! {}
         } else {
-            doc! { "batchSize": options.batch_size };
+            doc! { "batchSize": options.batch_size }
         };
 
         document.insert("cursor", cursor);
