@@ -81,10 +81,12 @@ impl From<AggregateOptions> for bson::Document {
             document.insert("allowDiskUse", allow_disk_use);
         }
 
-        // useCursor not currently used by the driver.
+        let cursor = if let Some(false) = options.use_cursor {
+           doc! {}
+        } else {
+            doc! { "batchSize": options.batch_size }
+        };
 
-
-        let cursor = doc! { "batchSize": options.batch_size };
         document.insert("cursor", cursor);
 
         // maxTimeMS is not currently used by the driver.
