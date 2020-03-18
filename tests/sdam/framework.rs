@@ -23,7 +23,7 @@ pub fn run_suite(file: &str, description: Option<TopologyDescription>) {
     // should pass in an unknown topology. For a base standalone topology,
     // the user should note that they expect a standalone by providing TopologyType::Single.
     let should_ignore_description = if let Some(ref inner) = description {
-        inner.topology_type == TopologyType::Single && connection_string.hosts.len() != 1
+        inner.topology_type == TopologyType::Single && connection_string.hosts.num_hosts() != 1
     } else {
         false
     };
@@ -43,7 +43,7 @@ pub fn run_suite(file: &str, description: Option<TopologyDescription>) {
     let mut servers = HashMap::new();
 
     // Fill servers array
-    for host in &connection_string.hosts {
+    for host in connection_string.hosts.iter() {
         let mut topology_description = topology.description.write().unwrap();
         let server = Server::new(
             dummy_client.clone(),

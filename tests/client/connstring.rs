@@ -85,8 +85,12 @@ fn required_host() {
     assert!(result.is_ok());
 
     let connstr = result.unwrap();
-    assert_eq!(1, connstr.hosts.len());
-    assert_eq!("local", connstr.hosts[0].host_name);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert_eq!(1, hosts.len());
+        assert_eq!("local", hosts[0].host_name);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
@@ -96,28 +100,40 @@ fn replica_sets() {
     assert!(result.is_ok());
 
     let connstr = result.unwrap();
-    assert_eq!(3, connstr.hosts.len());
-    assert_eq!("local", connstr.hosts[0].host_name);
-    assert_eq!(27017, connstr.hosts[0].port);
-    assert_eq!("remote", connstr.hosts[1].host_name);
-    assert_eq!(27018, connstr.hosts[1].port);
-    assert_eq!("japan", connstr.hosts[2].host_name);
-    assert_eq!(30000, connstr.hosts[2].port);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert_eq!(3, hosts.len());
+        assert_eq!("local", hosts[0].host_name);
+        assert_eq!(27017, hosts[0].port);
+        assert_eq!("remote", hosts[1].host_name);
+        assert_eq!(27018, hosts[1].port);
+        assert_eq!("japan", hosts[2].host_name);
+        assert_eq!(30000, hosts[2].port);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
 fn default_port_on_single_host() {
     let uri = "mongodb://local/";
     let connstring = connstring::parse(uri).unwrap();
-    assert_eq!(connstring::DEFAULT_PORT, connstring.hosts[0].port);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstring.hosts {
+        assert_eq!(connstring::DEFAULT_PORT, hosts[0].port);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
 fn default_port_on_replica_set() {
     let uri = "mongodb://local,remote/";
     let connstring = connstring::parse(uri).unwrap();
-    assert_eq!(connstring::DEFAULT_PORT, connstring.hosts[0].port);
-    assert_eq!(connstring::DEFAULT_PORT, connstring.hosts[1].port);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstring.hosts {
+        assert_eq!(connstring::DEFAULT_PORT, hosts[0].port);
+        assert_eq!(connstring::DEFAULT_PORT, hosts[1].port);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
@@ -188,8 +204,12 @@ fn read_pref_tags() {
 fn unix_domain_socket_single() {
     let uri = "mongodb:///tmp/mongodb-27017.sock/?safe=false";
     let connstr = connstring::parse(uri).unwrap();
-    assert!(connstr.hosts[0].has_ipc());
-    assert_eq!("/tmp/mongodb-27017.sock", connstr.hosts[0].ipc);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert!(hosts[0].has_ipc());
+        assert_eq!("/tmp/mongodb-27017.sock", hosts[0].ipc);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
@@ -197,8 +217,12 @@ fn unix_domain_socket_auth() {
     let uri = "mongodb://user:password@/tmp/mongodb-27017.sock/?safe=false";
     let connstr = connstring::parse(uri).unwrap();
     let options = connstr.options.unwrap();
-    assert!(connstr.hosts[0].has_ipc());
-    assert_eq!("/tmp/mongodb-27017.sock", connstr.hosts[0].ipc);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert!(hosts[0].has_ipc());
+        assert_eq!("/tmp/mongodb-27017.sock", hosts[0].ipc);
+    } else {
+        panic!("unexpected protocol");
+    }
     assert_eq!("user", connstr.user.unwrap());
     assert_eq!("password", connstr.password.unwrap());
     assert_eq!("false", options.get("safe").unwrap());
@@ -210,10 +234,14 @@ fn unix_domain_socket_replica_set() {
                sock/dbname?safe=false";
     let connstr = connstring::parse(uri).unwrap();
     let options = connstr.options.unwrap();
-    assert!(connstr.hosts[0].has_ipc());
-    assert!(connstr.hosts[1].has_ipc());
-    assert_eq!("/tmp/mongodb-27017.sock", connstr.hosts[0].ipc);
-    assert_eq!("/tmp/mongodb-27018.sock", connstr.hosts[1].ipc);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert!(hosts[0].has_ipc());
+        assert!(hosts[1].has_ipc());
+        assert_eq!("/tmp/mongodb-27017.sock", hosts[0].ipc);
+        assert_eq!("/tmp/mongodb-27018.sock", hosts[1].ipc);
+    } else {
+        panic!("unexpected protocol");
+    }
     assert_eq!("user", connstr.user.unwrap());
     assert_eq!("password", connstr.password.unwrap());
     assert_eq!("dbname", connstr.database.unwrap());
@@ -224,9 +252,13 @@ fn unix_domain_socket_replica_set() {
 fn ipv6() {
     let uri = "mongodb://[::1]:27017/test";
     let connstr = connstring::parse(uri).unwrap();
-    assert_eq!(1, connstr.hosts.len());
-    assert_eq!("::1", connstr.hosts[0].host_name);
-    assert_eq!(27017, connstr.hosts[0].port);
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert_eq!(1, hosts.len());
+        assert_eq!("::1", hosts[0].host_name);
+        assert_eq!(27017, hosts[0].port);
+    } else {
+        panic!("unexpected protocol");
+    }
 }
 
 #[test]
@@ -240,13 +272,18 @@ fn full() {
     assert_eq!("u#ser", connstr.user.unwrap());
     assert_eq!("pas#s", connstr.password.unwrap());
     assert_eq!("rocksdb", connstr.database.unwrap());
-    assert_eq!(3, connstr.hosts.len());
-    assert_eq!("local", connstr.hosts[0].host_name);
-    assert_eq!(connstring::DEFAULT_PORT, connstr.hosts[0].port);
-    assert_eq!("remote", connstr.hosts[1].host_name);
-    assert_eq!(27018, connstr.hosts[1].port);
-    assert_eq!("japan", connstr.hosts[2].host_name);
-    assert_eq!(27019, connstr.hosts[2].port);
+
+    if let connstring::ConnectionProtocol::Hosts(hosts) = connstr.hosts {
+        assert_eq!(3, hosts.len());
+        assert_eq!("local", hosts[0].host_name);
+        assert_eq!(connstring::DEFAULT_PORT, hosts[0].port);
+        assert_eq!("remote", hosts[1].host_name);
+        assert_eq!(27018, hosts[1].port);
+        assert_eq!("japan", hosts[2].host_name);
+        assert_eq!(27019, hosts[2].port);
+    } else {
+        panic!("unexpected protocol");
+    }
 
     let options = connstr.options.unwrap();
     assert_eq!("myreplset", options.get("replicaSet").unwrap());
