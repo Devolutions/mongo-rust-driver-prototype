@@ -1,5 +1,5 @@
 //! Options for collection-level operations.
-use bson::{self, Bson, bson, doc};
+use bson::{self, bson, Bson, doc};
 use common::{ReadPreference, WriteConcern};
 use Error::ArgumentError;
 use Result;

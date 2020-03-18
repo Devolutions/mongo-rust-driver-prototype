@@ -1,5 +1,5 @@
 //! Lower-level file and chunk representations in GridFS.
-use bson::{self, Bson, bson, doc, oid};
+use bson::{self, bson, Bson, doc, oid};
 use bson::spec::BinarySubtype;
 
 use chrono::{DateTime, Utc};

@@ -1,7 +1,7 @@
 //! Authentication schemes.
 use crate::{wire_protocol::flags::OpQueryFlags, Client};
 use bson::{
-    bson, doc,
+    doc, bson,
     spec::BinarySubtype::Generic,
     Bson::{self, Binary},
     Document,
