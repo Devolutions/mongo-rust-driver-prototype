@@ -68,7 +68,6 @@ use common::{ReadPreference, merge_options, WriteConcern};
 use cursor::{Cursor, DEFAULT_BATCH_SIZE};
 use self::options::{CreateCollectionOptions, CreateUserOptions, UserInfoOptions};
 use semver::Version;
-use std::error::Error;
 use std::sync::Arc;
 
 /// Interfaces with a MongoDB database.
@@ -306,7 +305,7 @@ impl ThreadedDatabase for Database {
             Some(&Bson::String(ref s)) => {
                 match Version::parse(s) {
                     Ok(v) => Ok(v),
-                    Err(e) => Err(ResponseError(String::from(e.description()))),
+                    Err(e) => Err(ResponseError(e.to_string())),
                 }
             }
             _ => Err(ResponseError(
@@ -347,7 +346,7 @@ impl ThreadedDatabase for Database {
                 doc = merge_options(doc, user_options);
             }
             None => {
-                doc.insert("roles", Vec::new());
+                doc.insert_bson("roles".to_owned(), Bson::Array(Vec::new()));
             }
         };
 

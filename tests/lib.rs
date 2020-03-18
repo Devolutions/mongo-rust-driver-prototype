@@ -40,9 +40,9 @@
 
 #[macro_use(ulps_eq)]
 extern crate approx;
-#[macro_use(bson, doc)]
+#[macro_use(doc)]
 extern crate bson;
-extern crate mongodb;
+extern crate mongodb_cwal as mongodb;
 extern crate rand;
 extern crate semver;
 #[macro_use]
