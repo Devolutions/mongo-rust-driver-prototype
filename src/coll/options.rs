@@ -311,6 +311,9 @@ pub struct IndexOptions {
     #[serde(skip_serializing_if="Option::is_none")]
     pub name: Option<String>,
 
+    #[serde(rename="partialFilterExpression", skip_serializing_if="Option::is_none")]
+    pub partial_filter_expression: Option<bson::Document>,
+
     #[serde(skip_serializing_if="Option::is_none")]
     pub sparse: Option<bool>,
 
@@ -432,6 +435,9 @@ impl IndexModel {
         }
         if let Some(val) = self.options.sparse {
             doc.insert("sparse", val);
+        }
+        if let Some(ref val) = self.options.partial_filter_expression {
+            doc.insert("partialFilterExpression", bson::Bson::Document(val.clone()));
         }
         if let Some(ref val) = self.options.storage_engine {
             doc.insert("storageEngine", bson::Bson::Document(val.clone()));
